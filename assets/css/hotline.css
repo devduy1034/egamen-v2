@@ -1,0 +1,187 @@
+#hotline {
+	left: var(--left, inherit);
+	right: var(--right, inherit);
+	bottom: var(--bottom, inherit);
+	display: none;
+}
+#hotline.btn-frame i {
+	background: var(--background);
+}
+#hotline.btn-frame .kenit-alo-circle {
+	border: 2px solid var(--background);
+	border-color: var(--background);
+}
+#hotline.btn-frame .kenit-alo-circle-fill {
+	background-color: var(--background);
+}
+
+#hotline.btn-phone span {
+	position: absolute;
+	--location: 30px;
+	top: 50%;
+	transform: translateY(-50%);
+	background: var(--backgroundText);
+	padding: 5px 40px 5px 25px;
+	z-index: -1;
+	border: 1px solid var(--backgroundText);
+	border-radius: 30px;
+	color: var(--color);
+	font-weight: 700;
+	font-size: 17px;
+}
+
+.contact-group {
+	position: fixed;
+	z-index: 999999;
+}
+.contact-group .icon,
+.btn-icon-facebook .icon-fb {
+	width: 48px;
+	height: 48px;
+	background: var(--background);
+	border-radius: 50%;
+	position: relative;
+	cursor: pointer;
+}
+.contact-group .icon:after,
+.btn-icon-facebook .icon-fb:after {
+	content: '';
+	display: block;
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	top: 0;
+	left: 0;
+	background-color: inherit;
+	border-radius: inherit;
+	-webkit-animation: pulse-animation 1s cubic-bezier(0.24, 0, 0.38, 1) infinite;
+	animation: pulse-animation 1s cubic-bezier(0.24, 0, 0.38, 1) infinite;
+	z-index: -1;
+}
+.contact-group .icon:before,
+.btn-icon-facebook .icon-fb:before {
+	content: '';
+	display: block;
+	position: absolute;
+	width: 60px;
+	height: 60px;
+	top: -7px;
+	left: -7px;
+	border: 1px solid rgba(243, 113, 33, 0.2);
+	border-radius: inherit;
+	-webkit-animation: pulse-animation 1.5s cubic-bezier(0.24, 0, 0.38, 1) infinite;
+	animation: pulse-animation 1s cubic-bezier(0.24, 0, 0.38, 1) infinite;
+	animation-delay: 0.5s;
+	-webkit-animation-delay: 0.5s;
+	z-index: -1;
+	background: transparent;
+	-webkit-animation-fill-mode: forwards;
+}
+.contact-group .icon span {
+	width: 24px;
+	height: 1px;
+	background: #fff;
+	position: absolute;
+	left: 50%;
+	transform: translateX(-50%);
+	transition: all 240ms linear;
+}
+.contact-group .icon.active span:first-child {
+	transform: rotate(45deg);
+	top: 22px;
+	left: 11px;
+}
+.contact-group .icon.active span:nth-of-type(2) {
+	transform: scale(0);
+}
+.contact-group .icon.active span:nth-of-type(3) {
+	transform: rotate(-45deg);
+	top: 22px;
+	left: 11px;
+}
+.contact-group .icon span:first-child {
+	top: 17px;
+}
+.contact-group .icon span:nth-of-type(2) {
+	top: 24px;
+}
+.contact-group .icon span:nth-of-type(3) {
+	top: 31px;
+}
+.btn-icon-facebook {
+	display: block;
+	position: fixed;
+	bottom: 20px;
+	right: 20px;
+	z-index: 99999;
+	cursor: pointer;
+}
+.contact-group .button-action-group {
+	position: absolute;
+	right: -160px;
+	bottom: 55px;
+	min-width: 210px;
+}
+.contact-group .button-action-group:not(.active) a {
+	display: none;
+}
+.contact-group .button-action-group a {
+	display: block;
+	opacity: 0;
+	padding: 5px 10px;
+	background: var(--backgroundText);
+	margin-bottom: 15px;
+	color: var(--color);
+	font-size: 20px;
+	font-weight: bold;
+	border-radius: 30px;
+	letter-spacing: 1px;
+	-webkit-animation: fadeup 1s cubic-bezier(0.24, 0, 0.38, 1);
+	animation: fadeup 1s cubic-bezier(0.24, 0, 0.38, 1);
+	-webkit-animation-fill-mode: forwards;
+	animation-fill-mode: forwards;
+}
+.contact-group .button-action-group a + a {
+	animation-delay: 0.5s;
+	-webkit-animation-delay: 0.5s;
+}
+.contact-group .button-action-group a i {
+	width: 48px;
+	height: 48px;
+	background: var(--background);
+	line-height: 48px;
+	text-align: center;
+	border-radius: 50%;
+	margin: -10px 10px -10px -10px;
+	box-shadow: 2px 0 7px -2px #00000078;
+	position: relative;
+}
+.contact-group .button-action-group a i:after {
+	content: '';
+	position: absolute;
+	width: 40px;
+	height: 40px;
+	left: 3px;
+	top: 3px;
+	border-radius: 50%;
+	border-width: 1px;
+	border-left-color: #f1f1f1;
+	border-style: solid;
+	border-right-color: #f1f1f1;
+	border-top-color: transparent;
+	border-bottom-color: transparent;
+	-webkit-animation: rotate 1s cubic-bezier(0.24, 0, 0.38, 1) infinite;
+	animation: rotate 1s cubic-bezier(0.24, 0, 0.38, 1) infinite;
+}
+div.wpcf7-select-parent select option {
+	color: black;
+}
+.fb_dialog_advanced,
+.fb_dialog_mobile {
+	bottom: 20px !important;
+	right: 20px !important;
+	display: none !important;
+}
+input:focus {
+	outline: #f37121 5px !important;
+}

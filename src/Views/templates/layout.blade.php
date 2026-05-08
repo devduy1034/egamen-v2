@@ -1,0 +1,11 @@
+@extends('master')
+@section('contentmaster')
+    @include('layout.seo')
+    @include('layout.header')
+    @include('layout.navigation')
+    @includeWhen(!empty($slider), 'layout.slider')
+    @includeWhen(\LARAVEL\Core\Support\Str::isNotEmpty(BreadCrumbs::get()),'layout.breadcrumbs')
+    @yield('content')
+    @include('layout.footer')
+    @include('layout.extensions')
+@endsection

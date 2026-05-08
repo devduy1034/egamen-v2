@@ -1,0 +1,338 @@
+#social {
+	position: fixed;
+	z-index: 999;
+	left: var(--left, inherit);
+	right: var(--right, inherit);
+	bottom: var(--bottom, inherit);
+	display: none;
+}
+
+#social .btn-frame {
+	position: relative;
+	margin: 30px 0px;
+}
+
+#social .btn-frame i {
+	background-color: var(--background);
+}
+
+#social .btn-frame img {
+	border-radius: 50%;
+}
+
+#social .btn-frame .kenit-alo-circle {
+	border: 2px solid var(--background);
+	border-color: var(--background);
+}
+#social .btn-frame .kenit-alo-circle-fill {
+	background-color: var(--background);
+}
+
+
+/* TODO: Toolbar */
+.toolbar {
+    background: var(--background);
+    width: 100%;
+    padding: 10px;
+    bottom: 0px;
+    position: fixed;
+    z-index: 500;
+    height: auto;
+    left: 0px;
+    max-height: 65px;
+	display: none;
+}
+
+.toolbar ul {
+    list-style: none;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+    -webkit-align-items: center;
+    -moz-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    -webkit-box-pack: justify;
+    -webkit-justify-content: space-between;
+    -moz-box-pack: justify;
+    -ms-flex-pack: justify;
+    justify-content: space-between;
+    padding: 0px;
+    margin: 0px;
+}
+
+.toolbar ul li {
+    text-align: center;
+    width: 25%;
+}
+
+.toolbar ul li a {
+    display: block;
+    width: 100%;
+    cursor: pointer;
+}
+
+.toolbar ul li a img {
+    height: 30px;
+    width: 30px;
+    -webkit-animation: tada 1.2s infinite;
+    -moz-animation: tada 1.2s infinite;
+    -o-animation: tada 1.2s infinite;
+    animation: tada 1.2s infinite;
+}
+
+.toolbar ul li a span {
+    color: var(--color);
+    font-size: 10px;
+    display: block;
+}
+
+/* toolbar 3*/
+.toolbar-custom {
+    width: 100%;
+    bottom: 0px;
+    position: sticky;
+    z-index: 500;
+    left: 0px;
+    display: none;
+    -webkit-filter: drop-shadow(1px 1px 4px rgba(0, 0, 0, 0.75));
+    -moz-filter: drop-shadow(1px 1px 4px rgba(0, 0, 0, 0.75));
+    -ms-filter: drop-shadow(1px 1px 4px rgba(0, 0, 0, 0.75));
+    -o-filter: drop-shadow(1px 1px 4px rgba(0, 0, 0, 0.75));
+    margin-top: -25px;
+}
+
+.toolbar-custom.is-active .list-phone {
+    display: block;
+    -webkit-animation: quickShow .2s cubic-bezier(0.66, 0.45, 0.76, 1.53) forwards;
+    animation: quickShow .2s cubic-bezier(0.66, 0.45, 0.76, 1.53) forwards;
+}
+
+.toolbar-custom .list-phone {
+    position: absolute;
+    bottom: 100%;
+    left: 30px;
+    opacity: 0;
+    transform: scale(0);
+    transform-origin: 50% 100%;
+    display: none;
+}
+
+.toolbar-custom .list-phone a {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    background: #fff;
+    max-width: 240px;
+    padding: 10px 20px;
+    margin: 10px 0;
+    border-radius: 50px;
+    padding-right: 30px;
+}
+
+.toolbar-custom .list-phone svg {
+    max-width: 30px;
+    max-height: 30px;
+    fill: var(--background);
+}
+
+.toolbar-custom .list-phone span {
+    display: block;
+    width: calc(100% - 40px);
+    color: #333;
+    font-weight: 700;
+}
+
+.toolbar-custom .phone {
+    position: relative;
+    width: 50px;
+    height: 50px;
+    z-index: 99;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff;
+    border-radius: 50%;
+    margin: 0 0px -25px 30px;
+    transition: transform .2s ease-in-out;
+}
+
+.toolbar-custom .phone a {
+    color: #333;
+    display: block;
+    position: relative;
+}
+
+.toolbar-custom .phone span:before, .toolbar-custom .phone span:after {
+    position: absolute;
+    content: '';
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(135deg);
+    width: 30px;
+    height: 3px;
+    border-radius: 2rem;
+    background-color: var(--background);
+    opacity: 0;
+    transition: opacity .2s ease-in-out;
+}
+
+.toolbar-custom .phone span:after {
+    transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.toolbar-custom .phone svg {
+    max-width: 27px;
+    max-height: 27px;
+    display: block;
+    position: relative;
+    fill: var(--main-color);
+}
+
+.toolbar-custom.is-active .phone {
+    transform: rotate(-180deg);
+}
+
+.toolbar-custom.is-active .phone svg {
+    opacity: 0;
+}
+
+.toolbar-custom.is-active .phone span:before, .toolbar-custom.is-active .phone span:after {
+    opacity: 1;
+}
+
+.toolbar-custom ul {
+    list-style: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0px;
+    margin: 0px;
+    --size: 33px;
+    -webkit-mask: radial-gradient(var(--size) at 55px 0px, #0000 99%, #fff 101%) 100%;
+    background: var(--background);
+    padding: 10px 0;
+    padding-right: 10px;
+    padding-left: 100px;
+    border-radius: 10px 10px 0px 0px;
+}
+
+.toolbar-custom ul li {
+    text-align: center;
+    width: 25%;
+    line-height: 1;
+}
+
+.toolbar-custom ul li a {
+     display: block;
+    width: 100%;
+    color: var(--color);
+}
+
+.toolbar-custom ul li .icon {
+    position: relative;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.toolbar-custom ul li a span {
+     display: inline-block;
+    font-weight: 400;
+    font-size: 9px;
+    margin-top: 5px;
+    color: var(--color);
+    text-transform: capitalize;
+}
+
+.toolbar-custom ul li a img, .toolbar-custom ul li svg {
+    max-height: 30px;
+    fill: var(--main-color);
+}
+
+.toolbar-custom .phone svg {
+    animation: tada 1.2s infinite;
+    fill: var(--background);
+}
+
+.tada {
+    animation: tada 1.2s infinite;
+}
+
+.lang-toolbar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.toolbar-custom ul li.lang-toolbar a {
+    display: inline-block;
+    width: unset;
+    margin: 0px 2px;
+    font-size: unset;
+}
+
+.toolbar-custom ul li.lang-toolbar a img {
+    height: 10% !important;
+}
+
+.ex6 path {
+    fill: #fff;
+    stroke: var(--main-color);
+    stroke-width: 0.5;
+    stroke-dasharray: 1500;
+    stroke-dashoffset: 1500;
+    -webkit-animation: dash 5s ease forwards;
+    animation: dash 5s ease forwards;
+}
+
+@-webkit-keyframes dash {
+    to {
+        fill: var(--main-color);
+        stroke-dashoffset: 0;
+    }
+}
+
+@keyframes dash {
+    to {
+        fill: var(--main-color);
+        stroke-dashoffset: 0;
+    }
+}
+
+@keyframes tada {
+    0% {
+        transform: scaleX(1)
+    }
+
+    10%, 20% {
+        transform: scale3d(.9, .9, .9) rotate(-3deg)
+    }
+
+    30%, 50%, 70%, 90% {
+        transform: scale3d(1.1, 1.1, 1.1) rotate(3deg);
+    }
+
+    40%, 60%, 80% {
+        transform: scale3d(1.1, 1.1, 1.1) rotate(-3deg);
+    }
+
+    to {
+        transform: scaleX(1)
+    }
+}
+
+@keyframes quickShow {
+    0% {
+        opacity: 0;
+        transform: scale(0);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}

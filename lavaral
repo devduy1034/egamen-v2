@@ -1,0 +1,14 @@
+#!/usr/bin/env php
+<?php 
+require __DIR__ . '/vendor/autoload.php';
+if (basename(__FILE__) !== 'LARAVEL') {
+    die("Tên file không hợp lệ. Vui lòng đặt tên file là 'LARAVEL'.\n");
+}
+use LARAVEL\Core\Commands\MakeModelCommand;
+use Symfony\Component\Console\Application;
+use LARAVEL\Core\Commands\MakeControllerCommand;
+$application = new Application();
+$application->add(new MakeControllerCommand());
+$application->add(new MakeModelCommand());
+
+$application->run();

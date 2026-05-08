@@ -1,0 +1,23 @@
+<?php
+
+namespace {{ factoryNamespace }};
+
+use LARAVEL\DatabaseCore\Eloquent\Factories\Factory;
+
+/**
+ * @extends \LARAVEL\DatabaseCore\Eloquent\Factories\Factory<\{{ namespacedModel }}>
+ */
+class {{ factory }}Factory extends Factory
+{
+    /**
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
+     */
+    public function definition(): array
+    {
+        return [
+            //
+        ];
+    }
+}

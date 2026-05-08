@@ -1,0 +1,1 @@
+<input type="number" class="form-control form-control-mini m-auto update-numb" {{ !isPermissions(str_replace('-','.',$com).'.'.$type.'.edit')?'disabled':'' }} min="0" value="{{ $numb }}" data-id="{{ $idtbl }}" data-table="{{$table}}">

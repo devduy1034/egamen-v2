@@ -1,0 +1,17 @@
+<?php
+
+namespace {{ namespace }};
+
+use LARAVEL\DatabaseCore\Console\Seeds\WithoutModelEvents;
+use LARAVEL\DatabaseCore\Seeder;
+
+class {{ class }} extends Seeder
+{
+    /**
+     * Run the database seeds.
+     */
+    public function run(): void
+    {
+        //
+    }
+}

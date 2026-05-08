@@ -1,0 +1,27 @@
+.popup1 .modal-body {
+	padding: 0px;
+}
+
+.title-popup {
+	text-align: center;
+	font-size: 20px;
+	text-transform: uppercase;
+	margin: 0px 0px 0px;
+	color: var(--color);
+}
+
+.content-popup{
+	text-align: center;
+	color: var(--color1);
+}
+
+.form-popup {
+	padding: 20px;
+	background: var(--background);
+}
+
+#popup .btn-popup {
+	background: var(--background);
+	color: var(--color);
+	text-transform: uppercase;
+}

@@ -1,0 +1,27 @@
+<?php
+
+ namespace LARAVEL\Helpers\Clockwork\Eloquent;
+
+use Clockwork\DataSource\EloquentDataSource;
+
+use Illuminate\Database\Eloquent\{Builder, Model, ScopeInterface};
+
+class ResolveModelLegacyScope implements ScopeInterface
+{
+	protected $dataSource;
+
+	public function __construct(EloquentDataSource $dataSource)
+	{
+		$this->dataSource = $dataSource;
+	}
+
+	public function apply(Builder $builder, Model $model)
+	{
+		$this->dataSource->nextQueryModel = get_class($model);
+	}
+
+	public function remove(Builder $builder, Model $model)
+	{
+		// nothing to do here
+	}
+}

@@ -1,0 +1,20 @@
+<?php
+
+
+
+namespace LARAVEL\LARAVELGateway\Payoo\Concerns;
+
+trait ParametersNormalize
+{
+    protected function normalizeParameters(array $parameters): array
+    {
+        $normalizedParameters = [];
+
+        foreach ($parameters as $parameter => $value) {
+            $parameter = str_replace('_', '', $parameter);
+            $normalizedParameters[$parameter] = $value;
+        }
+
+        return $normalizedParameters;
+    }
+}
