@@ -18,7 +18,7 @@ body {
 
 .max-width,
 .wrap-content {
-  width: calc(100% - 20px);
+  width: calc(100% - 30px);
   max-width: 1620px;
   margin: auto;
 }
@@ -2090,6 +2090,7 @@ a.name-news.name1 {
   justify-content: space-between;
   align-items: center;
   border-top: 1px solid rgb(255 255 255 / 30%);
+  flex-wrap: wrap;
 }
 .statistic span {
   position: relative;
@@ -3017,10 +3018,13 @@ a.name-news.name1 {
 }
 @media (max-width: 991px) {
   .product-detail-v2 .product-detail-gallery {
-    display: block;
+    /* display: block; */
+    flex-wrap: wrap;
   }
   .product-detail-v2 .product-detail-main {
     width: 100%;
+    order: 1;
+    display: flex;
   }
   .product-detail-v2 .product-detail-thumbs {
     width: 100%;
@@ -3028,6 +3032,7 @@ a.name-news.name1 {
     max-height: none;
     margin-top: 10px;
     flex: 1 1 auto;
+    order: 2;
   }
   .product-detail-v2 .product-detail-thumbs .thumb-pro-detail {
     min-width: 74px;
@@ -4229,7 +4234,7 @@ div.baonoidung ol li {
 .policies-body {
   margin: auto;
   display: flex;
-  flex-wrap: no-wrap;
+  flex-wrap: wrap;
   justify-content: space-between;
   gap: 15px;
   overflow: auto;
@@ -4254,8 +4259,8 @@ div.baonoidung ol li {
 }
 .policies-body .policies-item {
   font-size: 14px;
-  flex: 0 0 calc(25% - 15px);
-  padding: 10px;
+  flex: 0 0 calc(25% - 4px);
+  padding: 4px;
 }
 .social {
   margin-bottom: 0;
@@ -6700,7 +6705,7 @@ div.baonoidung ol li {
 @media (max-width: 768px) {
   .chat-products-widget {
     right: 10px;
-    bottom: 10px;
+    /* bottom: 10px; */
     width: calc(100vw - 16px);
   }
 
@@ -6714,5 +6719,6 @@ div.baonoidung ol li {
 
   .chat-products-widget__teaser {
     width: calc(100vw - 92px);
+    display: none;
   }
 }
