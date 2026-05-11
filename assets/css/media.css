@@ -1,5 +1,11 @@
 /* Responsive */
 @media (max-width: 1025px) {
+	.info-footer .flex-footer {
+    flex-wrap: wrap;
+}
+	.title-footer {
+		font-size: 16px;
+	}
 	#hamburger {
 		display: block;
 	}

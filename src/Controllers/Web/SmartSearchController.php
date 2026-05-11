@@ -22,6 +22,8 @@ class SmartSearchController extends Controller
     private const DEFAULT_MAX_PER_PAGE = 72;
     private const DEFAULT_RESULT_LIMIT = 180;
     private const SEARCH_CANDIDATE_LIMIT = 120;
+    private const CHAT_RESULT_LIMIT = 6;
+    private const CHAT_MAX_QUERY_LENGTH = 160;
 
     public function search(Request $request)
     {
@@ -99,6 +101,79 @@ class SmartSearchController extends Controller
         return response()->json(['products' => $results]);
     }
 
+    public function chatProducts(Request $request)
+    {
+        $query = trim((string) ($request->input('message', $request->input('q', ''))));
+        if ($query === '') {
+            return response()->json([
+                'status' => 'invalid_request',
+                'message' => 'Vui lòng nhập nhu cầu sản phẩm.',
+                'data' => [],
+            ], 422);
+        }
+
+        if (mb_strlen($query, 'UTF-8') > self::CHAT_MAX_QUERY_LENGTH) {
+            return response()->json([
+                'status' => 'invalid_request',
+                'message' => 'Tin nhắn quá dài. Vui lòng nhập dưới 160 ký tự.',
+                'data' => [],
+            ], 422);
+        }
+
+        if ($this->isGreetingMessage($query)) {
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Em chào Anh/Chị. Anh/Chị muốn tìm sản phẩm gì để em hỗ trợ ngay ạ?',
+                'data' => [],
+            ]);
+        }
+
+        if (!$this->isInStoreSalesScope($query)) {
+            return response()->json([
+                'status' => 'out_of_scope',
+                'message' => 'Em chỉ hỗ trợ câu hỏi mua sắm sản phẩm trên website.',
+                'data' => [],
+            ]);
+        }
+
+        $useAiExtraction = $this->shouldUseAiExtractionForChat($query);
+        $filters = $this->parseFilters($query, $useAiExtraction, $this->getChatEntityPrompt());
+        $products = $this->searchProducts($query, $filters, self::CHAT_RESULT_LIMIT, false);
+
+        $mapped = $products->map(function ($product) {
+            return [
+                'id' => (int) ($product['id'] ?? 0),
+                'name' => (string) ($product['name'] ?? ''),
+                'price' => (int) ($product['price'] ?? 0),
+                'image_url' => (string) ($product['image'] ?? ''),
+                'product_url' => (string) ($product['url'] ?? '#'),
+                'product_html' => (string) ($product['html'] ?? ''),
+            ];
+        })->filter(static function ($item) {
+            return !empty($item['id']) && $item['name'] !== '';
+        })->values();
+
+        if ($mapped->isEmpty()) {
+            return response()->json([
+                'status' => 'no_products',
+                'message' => 'Chưa tìm thấy sản phẩm phù hợp. Vui lòng liên hệ tư vấn viên.',
+                'data' => [],
+                'filters' => array_filter($filters, static function ($value, $key) {
+                    return $key !== '_source';
+                }, ARRAY_FILTER_USE_BOTH),
+            ]);
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Đây là các sản phẩm phù hợp.',
+            'data' => $mapped,
+            'filters' => array_filter($filters, static function ($value, $key) {
+                return $key !== '_source';
+            }, ARRAY_FILTER_USE_BOTH),
+        ]);
+    }
+
     private function resolvePagination(Request $request): array
     {
         $defaultPerPage = max(1, (int) config('ai_search.search_per_page', self::DEFAULT_PER_PAGE));
@@ -122,7 +197,145 @@ class SmartSearchController extends Controller
         ];
     }
 
-    public function parseFilters(string $query, bool $useAI = true): array
+    private function isInStoreSalesScope(string $query): bool
+    {
+        $normalized = $this->normalizeSearchText($query);
+        if ($normalized === '') {
+            return false;
+        }
+
+        $shoppingSignals = [
+            'mua',
+            'tim',
+            'tu van',
+            'goi y',
+            'san pham',
+            'con hang',
+            'gia',
+            'size',
+            'mau',
+            'ao',
+            'quan',
+            'dam',
+            'vay',
+            'khoac',
+            'jacket',
+            'shirt',
+            'tshirt',
+            'polo',
+            'hoodie',
+            'sweater',
+            'jean',
+            'kaki',
+            'short',
+            'outfit',
+            'mix do',
+            'phoi do',
+            'non',
+            'mu',
+            'dep',
+            'giay',
+            'that lung',
+            'balo',
+            'tui',
+            'vi',
+        ];
+
+        foreach ($shoppingSignals as $signal) {
+            if ($this->textContainsSearchTerm($normalized, $signal)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function isGreetingMessage(string $query): bool
+    {
+        $normalized = trim($this->normalizeSearchText($query));
+        if ($normalized === '') {
+            return false;
+        }
+
+        $greetings = [
+            'hi',
+            'hello',
+            'helo',
+            'hey',
+            'xin chao',
+            'chao',
+            'chao shop',
+            'chao ban',
+            'chao ad',
+            'alo',
+        ];
+
+        foreach ($greetings as $greeting) {
+            if ($normalized === $greeting || $this->containsWholeTerm($normalized, $greeting)) {
+                return true;
+            }
+        }
+
+        if (preg_match('/^(xin|chao|hi|helo|hello|hey|alo)\b/u', $normalized) === 1) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private function shouldUseAiExtractionForChat(string $query): bool
+    {
+        $normalized = $this->normalizeSearchText($query);
+        if ($normalized === '') {
+            return false;
+        }
+
+        return str_contains($normalized, 'outfit')
+            || str_contains($normalized, 'set do')
+            || str_contains($normalized, 'phoi do')
+            || str_contains($normalized, 'mix do')
+            || str_contains($normalized, 'di lam')
+            || str_contains($normalized, 'di choi')
+            || str_contains($normalized, 'di bien')
+            || str_contains($normalized, 'mua dong')
+            || str_contains($normalized, 'mua he');
+    }
+
+    private function getChatEntityPrompt(): string
+    {
+        return <<<'PROMPT'
+You are an e-commerce fashion assistant for products in table_product.
+Task: extract product-search filters from a user message and return JSON only.
+
+Scope:
+- Only shopping/product search intent for this website.
+- If the question is outside product shopping scope, set intent="out_of_scope".
+
+Output schema:
+{
+  "intent":"product_search|out_of_scope|clarify",
+  "filters":{
+    "category":null|string,
+    "color":null|string,
+    "size":null|string,
+    "style":null|string,
+    "material":null|string,
+    "occasion":null|string,
+    "min_price":null|number,
+    "max_price":null|number
+  },
+  "inferred_keywords":[]
+}
+
+Rules:
+- Output JSON only, no markdown, no extra text.
+- Unknown fields must be null, inferred_keywords default [].
+- Normalize: category/color/style lower-case plain text; size uppercase (XS,S,M,L,XL,XXL,3XL).
+- Price must be integer VND (e.g. "duoi 500k" => max_price: 500000).
+PROMPT;
+    }
+
+    public function parseFilters(string $query, bool $useAI = true, ?string $customPrompt = null): array
     {
         $fallback = $this->normalizeFilters($this->heuristicFilters($query), $query, 'fallback');
 
@@ -136,7 +349,7 @@ class SmartSearchController extends Controller
         }
 
         try {
-            $prompt = <<<'PROMPT'
+            $prompt = $customPrompt ?? <<<'PROMPT'
 Bạn là AI Search Engine lõi của một website thời trang (dữ liệu từ table_product). 
 Nhiệm vụ duy nhất của bạn là phân tích câu truy vấn của người dùng và chuyển đổi nó thành một chuỗi JSON hợp lệ. KHÔNG dùng markdown (không bọc trong ```json), KHÔNG giải thích, KHÔNG thêm bất kỳ văn bản nào ngoài chuỗi JSON.
 
@@ -182,6 +395,7 @@ PROMPT;
                     ],
                     'generationConfig' => [
                         'temperature' => 0.1,
+                        'maxOutputTokens' => 220,
                         'responseMimeType' => 'application/json'
                     ]
                 ]);

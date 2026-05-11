@@ -64,6 +64,7 @@ LARAVELRouter::group(['namespace' => 'Web', 'prefix' => config('app.web_prefix')
     LARAVELRouter::get('/tim-kiem-goi-y', 'ProductController@suggestProduct')->name('tim-kiem-goi-y');
     LARAVELRouter::post('/smart-search', 'SmartSearchController@search')->name('smart-search');
     LARAVELRouter::get('/api/search-quick', 'SmartSearchController@quickSearch')->name('api.search-quick');
+    LARAVELRouter::get('/api/chat-products', 'SmartSearchController@chatProducts')->name('api.chat-products');
     LARAVELRouter::get('/api/recommendations', 'RecommendationController@index')->name('api.recommendations');
     LARAVELRouter::post('/api/events/track', 'EventTrackingController@track')->name('api.events.track');
 
