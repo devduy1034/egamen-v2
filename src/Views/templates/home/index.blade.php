@@ -168,7 +168,7 @@
                     <h2>Thời trang EGA</h2>
                 </div>
                 <div class="swiper swiper-auto"
-                    data-swiper="slidesPerView:1|spaceBetween:10|breakpoints:{370: {slidesPerView:2,spaceBetween:10},575: {slidesPerView:2,spaceBetween:20},768: {slidesPerView:3,spaceBetween:20},992: {slidesPerView:6,spaceBetween:10}}|autoplay:{delay: 5000,pauseOnMouseEnter:true,disableOnInteraction:false}|speed:1000|navigation:{nextEl:'.procat-next',prevEl:'.procat-prev'}|loop:true">
+                    data-swiper="slidesPerView:1|spaceBetween:10|breakpoints:{370: {slidesPerView:2,spaceBetween:10},575: {slidesPerView:3,spaceBetween:20},768: {slidesPerView:4,spaceBetween:20},992: {slidesPerView:6,spaceBetween:10}}|autoplay:{delay: 5000,pauseOnMouseEnter:true,disableOnInteraction:false}|speed:1000|navigation:{nextEl:'.procat-next',prevEl:'.procat-prev'}|loop:true">
                     <div
                         class="swiper-wrapper row row-product row-cols-2 row-cols-sm-3 row-cols-md-5 row-cols-lg-6 flex-nowrap gutter-x-20">
                         @foreach ($productcat as $v)
@@ -311,7 +311,7 @@
             <div class="wrap-content">
                 <div class="video-home" data-aos="zoom-in" data-aos-duration="1000">
                     <div class="video-wrapper">
-                        <iframe width="100%" height="100%" src="{{ Func::get_youtube($video['link'] ?? '') }}"
+                        <iframe width="100%" height="auto" src="{{ Func::get_youtube($video['link'] ?? '') }}"
                             loading="lazy" referrerpolicy="strict-origin-when-cross-origin" title="Video 1"
                             frameborder="0"
                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"

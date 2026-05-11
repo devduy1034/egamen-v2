@@ -48,18 +48,12 @@
     @php
         $transferUrl = !empty($page_transfer) ? $page_transfer : '';
     @endphp
-    @if(!empty($transferUrl) && !empty($numb))
-        <script type="text/javascript">
-            window.location.replace(@json($transferUrl));
-        </script>
-    @endif
     <div id="alert">
         <i class="fas {{ $numb ? 'fa-solid fa-check fasuccess' : 'fa-solid fa-exclamation fadanger' }}"></i>
         <div class="title">Thông báo</div>
         <div class="message alert {{ $numb ? 'alert-success' : 'alert-danger' }}">{!! @$showtext !!}</div>
         <div class="rlink">(
-            <a href="{{ $transferUrl ?: 'javascript:void(0)' }}" id="transfer-link"
-                onclick="if('{{ $transferUrl }}'){window.location.href='{{ $transferUrl }}';}else if(window.history&&window.history.length>1){window.history.back();}return false;">
+            <a href="{{ $transferUrl ?: 'javascript:void(0)' }}" id="transfer-link">
                 Click vào đây nếu không muốn đợi lâu
             </a>)
         </div>
@@ -74,6 +68,28 @@
             pos += 1;
             elem.style.width = pos + '%';
         }, 40);
+
+        (function() {
+            var transferUrl = @json($transferUrl);
+            var link = document.getElementById('transfer-link');
+
+            if (link) {
+                link.addEventListener('click', function(e) {
+                    if (transferUrl) {
+                        window.location.href = transferUrl;
+                    } else if (window.history && window.history.length > 1) {
+                        window.history.back();
+                    }
+                    e.preventDefault();
+                });
+            }
+
+            if (transferUrl) {
+                setTimeout(function() {
+                    window.location.href = transferUrl;
+                }, 3000);
+            }
+        })();
     </script>
 </BODY>
 
