@@ -629,7 +629,7 @@ NN_FRAMEWORK.Api = function () {
 				triggerContainer.find('span').first().trigger('click');
 			});
 		});
-		/* loc san phẩm */
+		/* loc san pham */
 		$('.sort-select-main span').on('click', function () {
 			var sort = $(this).data('sort');
 			$('.sort-select-main span').removeClass('active');
@@ -952,7 +952,7 @@ NN_FRAMEWORK.QuickView = function () {
 		return `
 		<div class="quickview-modal" id="${modalId}" aria-hidden="true">
 			<div class="quickview-dialog" role="dialog" aria-modal="true">
-				<button type="button" class="quickview-close" aria-label="Close">×</button>
+				<button type="button" class="quickview-close" aria-label="Close">&times;</button>
 				<div class="quickview-body">
 					<div class="quickview-loading">Đang tải...</div>
 				</div>
@@ -994,7 +994,7 @@ NN_FRAMEWORK.QuickView = function () {
 	}
 
 	function setError() {
-		setModalContent('<div class="quickview-error">Không tải được nội dung sản phẩm.</div>');
+		setModalContent('<div class="quickview-error">Không thể tải nội dung sản phẩm.</div>');
 	}
 
 	function simplifyQuickViewGrid(grid, detailUrl) {
@@ -1526,9 +1526,9 @@ NN_FRAMEWORK.SmartSearch = function () {
 		setLoading(false);
 
 		if (summary) {
-			summary.textContent = query ?
-				`Kết quả cho "${query}" • ${count} sản phẩm • Hiển thị ${startIndex}-${endIndex}` :
-				`${count} sản phẩm`;
+			summary.textContent = query
+				? `Kết quả cho "${query}": ${count} sản phẩm. Hiển thị ${startIndex}-${endIndex}`
+				: `${count} sản phẩm`;
 		}
 		if (title) {
 			title.textContent = query || 'Kết quả tìm kiếm';
@@ -1560,7 +1560,7 @@ NN_FRAMEWORK.SmartSearch = function () {
 		const trimmed = String(query || '').trim();
 		const requestedPage = Math.max(1, Number(page || 1));
 		if (trimmed.length < 2) {
-			setStatus('Vui lòng nhập từ khóa dài hơn để tìm kiếm.', 'warning');
+			setStatus('Vui lòng nhập từ khóa dài hơn 1 ký tự để tìm kiếm.', 'warning');
 			return;
 		}
 
@@ -1603,7 +1603,7 @@ NN_FRAMEWORK.SmartSearch = function () {
 				if (response.status >= 500) {
 					throw new Error('Máy chủ đang gặp lỗi khi xử lý AI search.');
 				}
-				throw new Error('Không thể xử lý yêu cầu.');
+				throw new Error('Không thể xử lý yêu cầu lúc này.');
 			}
 
 			if (!payload.success) {
@@ -1659,6 +1659,243 @@ NN_FRAMEWORK.SmartSearch = function () {
 	showDefaultState();
 	renderSuggestions();
 };
+
+NN_FRAMEWORK.ChatProducts = function () {
+	const root = document.querySelector('[data-chat-products-root]');
+	if (!root) return;
+
+	const endpoint = root.dataset.chatEndpoint || '';
+	const siteName = (root.dataset.chatSiteName || 'Website').trim() || 'Website';
+	const launcher = root.querySelector('[data-chat-products-launcher]');
+	const openTriggers = root.querySelectorAll('[data-chat-products-open]');
+	const dismissBtn = root.querySelector('[data-chat-products-dismiss]');
+	const teaser = root.querySelector('.chat-products-widget__teaser');
+	const panel = root.querySelector('[data-chat-products-panel]');
+	const minimizeBtn = root.querySelector('[data-chat-products-minimize]');
+	const resetBtn = root.querySelector('[data-chat-products-reset]');
+	const form = root.querySelector('[data-chat-products-form]');
+	const input = root.querySelector('[data-chat-products-input]');
+	const submit = root.querySelector('[data-chat-products-submit]');
+	const messages = root.querySelector('[data-chat-products-messages]');
+	const humanButton = root.querySelector('[data-chat-products-human]');
+
+	if (!endpoint || !launcher || !panel || !form || !input || !submit || !messages) return;
+
+	const escapeHtml = function (value) {
+		return String(value || '')
+			.replace(/&/g, '&amp;')
+			.replace(/</g, '&lt;')
+			.replace(/>/g, '&gt;')
+			.replace(/"/g, '&quot;')
+			.replace(/'/g, '&#39;');
+	};
+
+	const formatPrice = function (price) {
+		const value = Number(price || 0);
+		return value > 0 ? value.toLocaleString('vi-VN') + 'đ' : 'Liên hệ';
+	};
+
+	const defaultMessages = [
+		`Xin chào Anh/Chị! Em là trợ lý AI của ${siteName}.`,
+		'Em rất sẵn lòng hỗ trợ Anh/Chị.'
+	];
+
+	const addBubble = function (content, role = 'assistant', isHtml = false, extraClass = '') {
+		const bubble = document.createElement('div');
+		bubble.className = `chat-products-widget__bubble is-${role}${extraClass ? ` ${extraClass}` : ''}`;
+		if (isHtml) {
+			bubble.innerHTML = content;
+		} else {
+			bubble.textContent = content;
+		}
+		messages.appendChild(bubble);
+		messages.scrollTop = messages.scrollHeight;
+	};
+
+	const setLoading = function (loading) {
+		submit.disabled = !!loading;
+		input.disabled = !!loading;
+		submit.innerHTML = loading
+			? '<span class="chat-products-widget__send-wait">...</span>'
+			: '<i class="bi bi-send-fill" aria-hidden="true"></i>';
+		submit.classList.toggle('is-loading', !!loading);
+	};
+
+	let panelCloseTimer = null;
+	const setOpen = function (open, instant = false) {
+		if (panelCloseTimer) {
+			clearTimeout(panelCloseTimer);
+			panelCloseTimer = null;
+		}
+
+		if (open) {
+			launcher.hidden = true;
+			panel.hidden = false;
+			if (instant) {
+				panel.classList.add('is-open');
+			} else {
+				requestAnimationFrame(function () {
+					panel.classList.add('is-open');
+				});
+			}
+			setTimeout(function () {
+				input.focus();
+				messages.scrollTop = messages.scrollHeight;
+			}, 120);
+			return;
+		}
+
+		panel.classList.remove('is-open');
+		if (instant) {
+			panel.hidden = true;
+			launcher.hidden = false;
+			return;
+		}
+
+		panelCloseTimer = setTimeout(function () {
+			panel.hidden = true;
+			launcher.hidden = false;
+		}, 220);
+	};
+
+	const resetConversation = function () {
+		messages.innerHTML = '';
+		defaultMessages.forEach(function (text) {
+			addBubble(text, 'assistant');
+		});
+		if (humanButton) humanButton.hidden = true;
+	};
+
+	const setTeaserVisible = function (visible) {
+		if (!teaser) return;
+		teaser.hidden = !visible;
+		launcher.classList.toggle('is-teaser-hidden', !visible);
+	};
+
+	let typingBubble = null;
+	const showTyping = function () {
+		if (typingBubble) return;
+		typingBubble = document.createElement('div');
+		typingBubble.className = 'chat-products-widget__bubble is-assistant is-typing';
+		typingBubble.innerHTML = '<em>Đang nhập tin nhắn</em><span class="chat-products-widget__typing-dots"><span></span><span></span><span></span></span>';
+		messages.appendChild(typingBubble);
+		messages.scrollTop = messages.scrollHeight;
+	};
+
+	const hideTyping = function () {
+		if (!typingBubble) return;
+		typingBubble.remove();
+		typingBubble = null;
+	};
+
+	const renderProducts = function (items) {
+		if (!Array.isArray(items) || !items.length) return;
+
+		const htmlCards = items
+			.map(function (item) {
+				return String(item.product_html || '').trim();
+			})
+			.filter(function (html) {
+				return html !== '';
+			});
+
+		if (htmlCards.length) {
+			addBubble(`<div class="chat-products-widget__product-grid">${htmlCards.join('')}</div>`, 'assistant', true, 'is-products');
+			return;
+		}
+
+		const htmlItems = items.map(function (item) {
+			const name = escapeHtml(item.name || 'Sản phẩm');
+			const url = escapeHtml(item.product_url || '#');
+			const price = escapeHtml(formatPrice(item.price));
+			return `<li><a href="${url}" target="_blank" rel="noopener noreferrer">${name}</a> - ${price}</li>`;
+		});
+
+		addBubble(`<ul class="chat-products-widget__product-list">${htmlItems.join('')}</ul>`, 'assistant', true);
+	};
+
+	openTriggers.forEach(function (trigger) {
+		trigger.addEventListener('click', function () {
+			setOpen(true);
+		});
+	});
+
+	if (minimizeBtn) {
+		minimizeBtn.addEventListener('click', function () {
+			setOpen(false);
+		});
+	}
+
+	if (resetBtn) {
+		resetBtn.addEventListener('click', function () {
+			resetConversation();
+		});
+	}
+
+	if (dismissBtn) {
+		dismissBtn.addEventListener('click', function (event) {
+			event.preventDefault();
+			event.stopPropagation();
+			setTeaserVisible(false);
+		});
+	}
+
+	form.addEventListener('submit', async function (event) {
+		event.preventDefault();
+		const query = String(input.value || '').trim();
+		if (query.length < 2) return;
+
+		addBubble(query, 'user');
+		input.value = '';
+		setLoading(true);
+		showTyping();
+		if (humanButton) humanButton.hidden = true;
+
+		try {
+			const response = await fetch(`${endpoint}?message=${encodeURIComponent(query)}`, {
+				method: 'GET',
+				headers: {
+					'Accept': 'application/json',
+					'X-Requested-With': 'XMLHttpRequest'
+				},
+				credentials: 'same-origin'
+			});
+
+			const payload = await response.json();
+			const status = String(payload.status || '');
+			const message = String(payload.message || '');
+			hideTyping();
+
+			if (status === 'success') {
+				addBubble(message || 'Đây là các sản phẩm phù hợp.', 'assistant');
+				renderProducts(payload.data || []);
+			} else if (status === 'no_products') {
+				addBubble(message || 'Chưa tìm thấy sản phẩm phù hợp. Vui lòng liên hệ tư vấn viên.', 'assistant');
+				if (humanButton) humanButton.hidden = false;
+			} else if (status === 'out_of_scope') {
+				addBubble(message || 'Em chỉ hỗ trợ câu hỏi mua sắm sản phẩm trên website.', 'assistant');
+			} else {
+				addBubble(message || 'Không thể xử lý yêu cầu lúc này.', 'assistant');
+			}
+		} catch (error) {
+			addBubble('Không thể kết nối lúc này. Vui lòng thử lại.', 'assistant');
+		} finally {
+			hideTyping();
+			setLoading(false);
+		}
+	});
+
+	if (humanButton) {
+		humanButton.addEventListener('click', function () {
+			const base = (typeof BASE === 'string' && BASE.length) ? BASE : '/';
+			window.location.href = base + 'lien-he';
+		});
+	}
+
+	resetConversation();
+	setTeaserVisible(true);
+	setOpen(false, true);
+};
 /* Ready */
 $(document).ready(function () {
 	NN_FRAMEWORK.Api();
@@ -1679,6 +1916,7 @@ $(document).ready(function () {
 	NN_FRAMEWORK.VoucherHome();
 	NN_FRAMEWORK.Main();
 	NN_FRAMEWORK.SmartSearch();
+	NN_FRAMEWORK.ChatProducts();
 	NN_FRAMEWORK.NavSmartSearch();
 	if (isExist($('.comment-page'))) {
 		new Comments('.comment-page', BASE);
@@ -1689,3 +1927,5 @@ $(document).ready(function () {
 window.addEventListener('load', () => {
 	NN_FRAMEWORK.Img();
 });
+
+

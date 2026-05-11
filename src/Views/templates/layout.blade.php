@@ -6,6 +6,7 @@
     @includeWhen(!empty($slider), 'layout.slider')
     @includeWhen(\LARAVEL\Core\Support\Str::isNotEmpty(BreadCrumbs::get()),'layout.breadcrumbs')
     @yield('content')
+    @include('layout.chat-products-widget')
     @include('layout.footer')
     @include('layout.extensions')
 @endsection
