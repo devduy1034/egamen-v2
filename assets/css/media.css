@@ -52,6 +52,7 @@
 
 	.policies-body {
 		gap: 4px;
+		flex-wrap: wrap;
 	}
 
 	.wrap-criteria {

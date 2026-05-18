@@ -4234,9 +4234,9 @@ div.baonoidung ol li {
 .policies-body {
   margin: auto;
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   justify-content: space-between;
-  gap: 15px;
+  /* gap: 15px; */
   overflow: auto;
 }
 
