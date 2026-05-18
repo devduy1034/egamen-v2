@@ -13,7 +13,7 @@
  */
 
 namespace CKSource\CKFinder;
-use NINACORE\Core\Support\Facades\Auth;
+use LARAVEL\Core\Support\Facades\Auth;
 use CKSource\CKFinder\Acl\Acl;
 use CKSource\CKFinder\Acl\User\SessionRoleContext;
 use CKSource\CKFinder\Authentication\AuthenticationInterface;

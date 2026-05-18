@@ -984,8 +984,11 @@ class CartController extends Controller
         return true;
     }
     public function vnpayReturn(Request $request)
+
+    
     {
         return $this->handleVNPayCallback($request, false);
+
     }
     public function vnpayIpn(Request $request)
     {
@@ -993,6 +996,7 @@ class CartController extends Controller
     }
     protected function handleVNPayCallback(Request $request, bool $isIpn = false)
     {
+        
         $payload = $request->query->all();
         $cartUrl = $this->resolveCallbackRedirectUrl($this->extractRoutePath((string) url('giohang')));
         if ($cartUrl === '') {
@@ -1062,6 +1066,7 @@ class CartController extends Controller
 
         return transfer("Thanh toán VNPay không thành công: " . $message, false, $cartUrl);
     }
+    
     protected function resolveCallbackRedirectUrl(string $pathOrUrl): string
     {
         $relativePath = $this->extractRoutePath($pathOrUrl);
@@ -1249,6 +1254,15 @@ class CartController extends Controller
     }
     protected function resolveVNPayReturnUrl(): string
     {
+        $configuredReturnUrl = trim((string) env('VNPAY_RETURN_URL', ''));
+        if ($configuredReturnUrl !== '') {
+            if (preg_match('#^https?://#i', $configuredReturnUrl)) {
+                return $configuredReturnUrl;
+            }
+
+            return $this->ensureAbsoluteUrl($configuredReturnUrl);
+        }
+
         return $this->ensureAbsoluteUrl($this->extractRoutePath((string) url('vnpay.return')));
     }
     protected function ensureAbsoluteUrl(string $pathOrUrl): string
