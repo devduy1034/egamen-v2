@@ -84,6 +84,7 @@ LARAVELRouter::group(['namespace' => 'Web', 'prefix' => config('app.web_prefix')
         LARAVELRouter::get('/account', 'AuthController@account')->name('user.account');
         LARAVELRouter::get('/account/orders/detail', 'AuthController@accountOrderDetail')->name('user.account.orders.detail');
         LARAVELRouter::post('/account/orders/cancel', 'AuthController@accountCancelOrder')->name('user.account.orders.cancel');
+        LARAVELRouter::post('/account/orders/retry-payment', 'CartController@retryVNPayPayment')->name('user.account.orders.retry-payment');
         LARAVELRouter::post('/account/profile', 'AuthController@updateProfile')->name('user.account.profile');
         LARAVELRouter::post('/account/address', 'AuthController@saveAddress')->name('user.account.address.save');
         LARAVELRouter::post('/account/address/delete', 'AuthController@deleteAddress')->name('user.account.address.delete');

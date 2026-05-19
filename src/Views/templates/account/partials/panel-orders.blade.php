@@ -1,11 +1,27 @@
 @php
     $orderDetailApiUrl = url('user.account.orders.detail');
     $orderCancelApiUrl = url('user.account.orders.cancel');
+    $orderRetryPaymentUrl = url('user.account.orders.retry-payment');
     $commentReviewApiUrl = rtrim((string) config('app.site_path'), '/') . '/comment/add-comment';
     $csrfToken = csrf_token();
     $orderKeywordValue = trim((string) ($orderKeyword ?? ''));
     $orderCurrentPage = is_object($orders ?? null) && method_exists($orders, 'currentPage') ? (int) $orders->currentPage() : 1;
     $deliveredOrderStatusId = (int) ($deliveredOrderStatusId ?? 0);
+    $normalizeForMatch = static function ($value) {
+        $text = mb_strtolower(trim((string) $value), 'UTF-8');
+        if ($text === '') {
+            return '';
+        }
+        if (function_exists('iconv')) {
+            $ascii = @iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $text);
+            if (!empty($ascii)) {
+                $text = strtolower((string) $ascii);
+            }
+        }
+        $text = preg_replace('/[^a-z0-9]+/', ' ', (string) $text);
+        $text = preg_replace('/\s+/', ' ', (string) $text);
+        return trim((string) $text);
+    };
 @endphp
 
 <section class="account-panel {{ $activeSection === 'orders' ? 'is-active' : '' }}">
@@ -121,6 +137,9 @@
             $canCancelOrder = (int) ($order->order_status ?? 0) === 1;
             $isDeliveredOrder = $deliveredOrderStatusId > 0 && (int) ($order->order_status ?? 0) === $deliveredOrderStatusId;
             $paymentMethodName = trim((string) ($order->getPayment->namevi ?? ''));
+            $normalizedPaymentMethodName = $normalizeForMatch($paymentMethodName);
+            $isVNPayOrder = str_contains($normalizedPaymentMethodName, 'vnpay') || str_contains($normalizedPaymentMethodName, 'vn pay');
+            $canRetryVNPay = $canCancelOrder && $isVNPayOrder;
             $detailAnchor = '#order-card-' . (int) ($order->id ?? 0);
             $detailFallbackUrl =
                 ($isSelectedOrder
@@ -198,6 +217,15 @@
                     @endif
                 </div>
                 <div class="account-order-detail__tools">
+                    @if ($canRetryVNPay)
+                        <form method="post" action="{{ $orderRetryPaymentUrl }}" class="d-inline-block">
+                            <input type="hidden" name="csrf_token" value="{{ $csrfToken }}">
+                            <input type="hidden" name="order_id" value="{{ (int) ($order->id ?? 0) }}">
+                            <button type="submit" class="btn account-btn">
+                                Thanh toán lại
+                            </button>
+                        </form>
+                    @endif
                     @if ($canCancelOrder)
                         <button type="button"
                             class="btn account-btn account-btn--outline account-btn--danger js-order-cancel"
