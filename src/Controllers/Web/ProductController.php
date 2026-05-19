@@ -343,7 +343,7 @@ class ProductController extends Controller
     public function searchProduct(Request $request)
     {
         $keyword = trim((string) $request->query('keyword', ''));
-        
+
         $smartSearch = app(\LARAVEL\Controllers\Web\SmartSearchController::class);
         $filters = $smartSearch->parseFilters($keyword);
         $results = $smartSearch->searchProducts($keyword, $filters, 36);
@@ -359,7 +359,7 @@ class ProductController extends Controller
         if (!empty($productIds)) {
             $idStr = implode(',', $productIds);
             $query->whereIn('id', $productIds)
-                  ->orderByRaw("FIELD(id, $idStr)");
+                ->orderByRaw("FIELD(id, $idStr)");
         } else {
             // Fallback if no AI results found, just return empty paginator
             $query->where('id', 0);

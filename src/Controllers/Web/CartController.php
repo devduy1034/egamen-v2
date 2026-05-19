@@ -932,7 +932,7 @@ class CartController extends Controller
                     return response()->redirect($redirectUrl);
                 } catch (\Throwable $e) {
                     if (!empty($order ?? null)) {
-                        $this->markVNPayFailedOrder($order, "Khởi tạo VNPay thất bại: " . $e->getMessage(), true);
+                        $this->markVNPayFailedOrder($order, "Khởi tạo VNPay thất bại: " . $e->getMessage(), false);
                     } else {
                         $this->releaseOrderInventory($orderDetail);
                     }
@@ -982,6 +982,70 @@ class CartController extends Controller
         Email::send("customer", $arrayEmail, $subject, $message, '', $optCompany, $company);
 
         return true;
+    }
+    public function retryVNPayPayment(Request $request)
+    {
+        $ordersUrl = (string) url('user.account', null, ['section' => 'orders']);
+        if (empty($request->csrf_token)) {
+            return transfer("Phiên làm việc đã hết hạn. Vui lòng tải lại trang.", false, $ordersUrl);
+        }
+
+        $memberId = $this->resolveMemberIdFromSession();
+        if ($memberId <= 0) {
+            return transfer("Vui lòng đăng nhập lại để tiếp tục.", false, (string) url('user.login'));
+        }
+
+        $orderId = max(0, (int) $request->input('order_id', 0));
+        if ($orderId <= 0) {
+            return transfer("Đơn hàng không hợp lệ.", false, $ordersUrl);
+        }
+
+        $accountOrderUrl = (string) url('user.account', null, [
+            'section' => 'orders',
+            'order_id' => $orderId,
+        ]);
+
+        $order = OrdersModel::where('id', $orderId)
+            ->where('id_user', $memberId)
+            ->first();
+        if (empty($order)) {
+            return transfer("Không tìm thấy đơn hàng cần thanh toán lại.", false, $ordersUrl);
+        }
+
+        if (!$this->canRetryVNPayOrder($order)) {
+            return transfer("Đơn hàng chưa đủ điều kiện để thanh toán lại VNPay.", false, $accountOrderUrl);
+        }
+
+        try {
+            $infoUserRaw = $order->info_user ?? [];
+            $infoUser = is_array($infoUserRaw) ? $infoUserRaw : (array) $infoUserRaw;
+            if (!$this->hasReservedInventoryFlag($infoUser)) {
+                $reserveResult = $this->reserveOrderInventory($order->order_detail ?? []);
+                if (empty($reserveResult['status'])) {
+                    $message = trim((string) ($reserveResult['message'] ?? ''));
+                    if ($message === '') {
+                        $message = "Tồn kho đã thay đổi, chưa thể thanh toán lại đơn này.";
+                    }
+                    return transfer($message, false, $accountOrderUrl);
+                }
+                $updatedInfoUser = $this->markReservedInventoryFlag($infoUser);
+                OrdersModel::where('id', (int) $order->id)->update(['info_user' => $updatedInfoUser]);
+                $order->info_user = $updatedInfoUser;
+            }
+
+            $pendingStatusId = $this->resolvePendingPaymentStatusId();
+            if ($pendingStatusId > 0 && (int) ($order->order_status ?? 0) !== $pendingStatusId) {
+                OrdersModel::where('id', (int) $order->id)->update(['order_status' => $pendingStatusId]);
+                $order->order_status = $pendingStatusId;
+            }
+
+            $this->appendOrderNote($order, 'Yêu cầu thanh toán lại VNPay.');
+            $redirectUrl = $this->buildVNPayRedirectUrl($order, $request);
+            return response()->redirect($redirectUrl);
+        } catch (\Throwable $e) {
+            $this->markVNPayFailedOrder($order, "Khởi tạo lại VNPay thất bại: " . $e->getMessage(), false);
+            return transfer("Không thể khởi tạo lại thanh toán VNPay. Vui lòng thử lại.", false, $accountOrderUrl);
+        }
     }
     public function vnpayReturn(Request $request)
 
@@ -1054,7 +1118,7 @@ class CartController extends Controller
             . '; TxnRef=' . $txnRef
             . '; ResponseCode=' . ($responseCode !== '' ? $responseCode : 'N/A')
             . '; Message=' . $message;
-        $this->markVNPayFailedOrder($order, $failedNote, true);
+        $this->markVNPayFailedOrder($order, $failedNote, false);
 
         if ($isIpn) {
             return $this->buildVNPayIpnResponse('00', 'Confirm Success');
@@ -1109,6 +1173,24 @@ class CartController extends Controller
             'RspCode' => $code,
             'Message' => $message,
         ]);
+    }
+    protected function canRetryVNPayOrder(OrdersModel $order): bool
+    {
+        if (!$this->isVNPayPaymentMethod((int) ($order->order_payment ?? 0))) {
+            return false;
+        }
+
+        $pendingStatusId = $this->resolvePendingPaymentStatusId();
+        if ($pendingStatusId > 0 && (int) ($order->order_status ?? 0) !== $pendingStatusId) {
+            return false;
+        }
+
+        $paidStatusId = $this->resolveVNPayPaidStatusId();
+        if ($paidStatusId > 0 && (int) ($order->order_status ?? 0) === $paidStatusId) {
+            return false;
+        }
+
+        return true;
     }
     protected function isVNPayPaymentMethod(int $paymentId): bool
     {
